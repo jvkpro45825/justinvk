@@ -19,7 +19,7 @@ const person: Person = {
   lastName: "Von Konsky",
   name: "Justin Von Konsky",
   role: "QA Automation & SDET in the making",
-  avatar: "/images/avatar-photo.jpg",
+  avatar: "/images/justin-portrait.jpg",
   email: "j.vonkonsky@protonmail.com",
   location: "America/Phoenix",
   languages: ["English"],

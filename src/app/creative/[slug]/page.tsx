@@ -7,7 +7,6 @@ import {
   Column,
   Flex,
   Heading,
-  Media,
   Text,
   SmartLink,
   Row,
@@ -20,6 +19,73 @@ import { Metadata } from "next";
 import { Projects } from "@/components/work/Projects";
 
 const CREATIVE_POSTS = ["src", "app", "creative", "projects"] as const;
+
+function getVimeoId(url: string): string | null {
+  try {
+    const u = new URL(url);
+    if (u.hostname !== "vimeo.com" && u.hostname !== "www.vimeo.com") return null;
+    const match = u.pathname.match(/^\/(\d+)(?:\/)?$/);
+    return match?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function getYouTubeId(url: string): string | null {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+    if (host === "youtu.be") {
+      return u.pathname.replace("/", "") || null;
+    }
+    if (host !== "youtube.com" && host !== "m.youtube.com") return null;
+    if (u.pathname === "/watch") return u.searchParams.get("v");
+    const match = u.pathname.match(/^\/embed\/([^/]+)$/) || u.pathname.match(/^\/shorts\/([^/]+)$/);
+    return match?.[1] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+function VideoEmbed({ url, title }: { url: string; title: string }) {
+  const vimeoId = getVimeoId(url);
+  const youtubeId = getYouTubeId(url);
+
+  let src: string | null = null;
+  if (vimeoId) src = `https://player.vimeo.com/video/${vimeoId}`;
+  if (youtubeId) src = `https://www.youtube.com/embed/${youtubeId}`;
+
+  if (!src) return null;
+
+  return (
+    <div
+      style={{
+        width: "100%",
+        maxWidth: "var(--static-width-m)",
+        borderRadius: "var(--radius-m)",
+        overflow: "hidden",
+        border: "1px solid var(--neutral-alpha-weak)",
+        background: "var(--page-background)",
+      }}
+    >
+      <div style={{ position: "relative", paddingTop: "56.25%" }}>
+        <iframe
+          src={src}
+          title={title}
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allowFullScreen
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            border: "0",
+          }}
+        />
+      </div>
+    </div>
+  );
+}
 
 export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const posts = getPosts([...CREATIVE_POSTS]);
@@ -124,9 +190,9 @@ export default async function CreativeProject({
       ) : (
         <Flex marginBottom="16" />
       )}
-      {post.metadata.images.length > 0 && (
-        <Media priority aspectRatio="16 / 9" radius="m" alt="image" src={post.metadata.images[0]} />
-      )}
+      {typeof post.metadata.link === "string" && post.metadata.link ? (
+        <VideoEmbed url={post.metadata.link} title={post.metadata.title} />
+      ) : null}
       <Column style={{ margin: "auto" }} as="article" maxWidth="xs">
         <CustomMDX source={post.content} />
       </Column>
