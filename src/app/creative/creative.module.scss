@@ -1,0 +1,58 @@
+.page {
+  position: relative;
+}
+
+/* Full-screen hero banner (scoped to /creative only) */
+.heroBanner {
+  /* Pull banner up behind the fixed header + outer padding */
+  --creative-banner-offset: 96px;
+  position: relative;
+  /* Counteract the layout's `padding=\"l\"` so the banner touches viewport edges */
+  margin-top: calc(-1 * var(--creative-banner-offset));
+  height: calc(100vh + var(--creative-banner-offset));
+  overflow: hidden;
+  background: #000;
+  border-bottom: 1px solid var(--neutral-alpha-weak);
+  /* Full-bleed inside centered / padded layout */
+  width: 100vw;
+  max-width: none;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+}
+
+.heroVideo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 177.78vh; /* 16:9 => inverse of 0.5625 */
+  height: calc(100vh + var(--creative-banner-offset));
+  /* Slight zoom to crop letterbox bars */
+  transform: translate(-50%, -50%) translateY(-10px) scale(1.5);
+  border: 0;
+}
+
+/* Cover very wide screens without letterboxing */
+@media (min-aspect-ratio: 16/9) {
+  .heroVideo {
+    width: 100vw;
+    height: calc(56.25vw + var(--creative-banner-offset));
+  }
+}
+
+.content {
+  position: relative;
+  z-index: 1;
+}
+
+@media (max-width: 768px) {
+  /* no-op: keeping for future banner tweaks */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .heroBanner {
+    display: none;
+  }
+}
+

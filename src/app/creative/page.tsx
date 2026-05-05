@@ -2,6 +2,7 @@ import { Column, Heading, Meta, Schema, Text, Row, SmartLink } from "@once-ui-sy
 import { baseURL, about, person, creative } from "@/resources";
 import { getPosts } from "@/utils/utils";
 import { formatDate } from "@/utils/formatDate";
+import styles from "./creative.module.scss";
 
 const CREATIVE_POSTS = ["src", "app", "creative", "projects"] as const;
 
@@ -86,57 +87,75 @@ export default function CreativePage() {
     (a, b) => new Date(b.metadata.publishedAt).getTime() - new Date(a.metadata.publishedAt).getTime(),
   );
 
+  const reel = posts.find((p) => p.slug === "reel-2024") ?? posts[0];
+  const reelId = reel?.metadata?.link ? getVimeoId(reel.metadata.link) : null;
+  const reelBgSrc = reelId
+    ? `https://player.vimeo.com/video/${reelId}?background=1&autoplay=1&loop=1&muted=1&playsinline=1&byline=0&title=0`
+    : null;
+
   return (
-    <Column maxWidth="m" paddingTop="24">
-      <Schema
-        as="webPage"
-        baseURL={baseURL}
-        path={creative.path}
-        title={creative.title}
-        description={creative.description}
-        image={`/api/og/generate?title=${encodeURIComponent(creative.title)}`}
-        author={{
-          name: person.name,
-          url: `${baseURL}${about.path}`,
-          image: `${baseURL}${person.avatar}`,
-        }}
-      />
-      <Heading marginBottom="l" variant="heading-strong-xl" align="center">
-        {creative.title}
-      </Heading>
-      <Column fillWidth gap="xl" paddingX="l" paddingBottom="40">
-        {posts.map((post) => (
-          <Column key={post.slug} fillWidth gap="12">
-            <Row fillWidth horizontal="between" vertical="end" wrap gap="12">
-              <Column gap="4">
-                <Heading variant="heading-strong-l" wrap="balance">
-                  {post.metadata.title}
-                </Heading>
-                {post.metadata.publishedAt ? (
-                  <Text variant="body-default-xs" onBackground="neutral-weak">
-                    {formatDate(post.metadata.publishedAt, false)}
-                  </Text>
+    <div className={styles.page}>
+      {reelBgSrc ? (
+        <div className={styles.heroBanner} aria-hidden="true">
+          <iframe
+            className={styles.heroVideo}
+            src={reelBgSrc}
+            title="Creative reel background"
+            allow="autoplay; fullscreen; picture-in-picture"
+            allowFullScreen
+          />
+        </div>
+      ) : null}
+
+      <Column className={styles.content} maxWidth="m" paddingTop="24">
+        <Schema
+          as="webPage"
+          baseURL={baseURL}
+          path={creative.path}
+          title={creative.title}
+          description={creative.description}
+          image={`/api/og/generate?title=${encodeURIComponent(creative.title)}`}
+          author={{
+            name: person.name,
+            url: `${baseURL}${about.path}`,
+            image: `${baseURL}${person.avatar}`,
+          }}
+        />
+
+        <Column fillWidth gap="xl" paddingX="l" paddingBottom="40">
+          {posts.map((post) => (
+            <Column key={post.slug} fillWidth gap="12">
+              <Row fillWidth horizontal="between" vertical="end" wrap gap="12">
+                <Column gap="4">
+                  <Heading variant="heading-strong-l" wrap="balance">
+                    {post.metadata.title}
+                  </Heading>
+                  {post.metadata.publishedAt ? (
+                    <Text variant="body-default-xs" onBackground="neutral-weak">
+                      {formatDate(post.metadata.publishedAt, false)}
+                    </Text>
+                  ) : null}
+                </Column>
+                {post.metadata.link ? (
+                  <SmartLink href={post.metadata.link}>
+                    <Text variant="label-default-m" onBackground="brand-medium">
+                      Open source video
+                    </Text>
+                  </SmartLink>
                 ) : null}
-              </Column>
-              {post.metadata.link ? (
-                <SmartLink href={post.metadata.link}>
-                  <Text variant="label-default-m" onBackground="brand-medium">
-                    Open source video
-                  </Text>
-                </SmartLink>
+              </Row>
+              {post.metadata.summary ? (
+                <Text variant="body-default-m" onBackground="neutral-weak">
+                  {post.metadata.summary}
+                </Text>
               ) : null}
-            </Row>
-            {post.metadata.summary ? (
-              <Text variant="body-default-m" onBackground="neutral-weak">
-                {post.metadata.summary}
-              </Text>
-            ) : null}
-            {typeof post.metadata.link === "string" && post.metadata.link ? (
-              <VideoEmbed url={post.metadata.link} title={post.metadata.title} />
-            ) : null}
-          </Column>
-        ))}
+              {typeof post.metadata.link === "string" && post.metadata.link ? (
+                <VideoEmbed url={post.metadata.link} title={post.metadata.title} />
+              ) : null}
+            </Column>
+          ))}
+        </Column>
       </Column>
-    </Column>
+    </div>
   );
 }

@@ -44,23 +44,28 @@ export default TimeDisplay;
 
 export const Header = () => {
   const pathname = usePathname() ?? "";
+  const isCreative = pathname === "/creative" || pathname.startsWith("/creative/");
 
   return (
     <>
-      <Fade s={{ hide: true }} fillWidth position="fixed" height="80" zIndex={9} />
-      <Fade
-        hide
-        s={{ hide: false }}
-        fillWidth
-        position="fixed"
-        bottom="0"
-        to="top"
-        height="80"
-        zIndex={9}
-      />
+      {/* These fades intentionally tint the page background behind the header.
+          On /creative we want the reel to show through, so we disable them there. */}
+      {!isCreative && <Fade s={{ hide: true }} fillWidth position="fixed" height="80" zIndex={9} />}
+      {!isCreative && (
+        <Fade
+          hide
+          s={{ hide: false }}
+          fillWidth
+          position="fixed"
+          bottom="0"
+          to="top"
+          height="80"
+          zIndex={9}
+        />
+      )}
       <Row
         fitHeight
-        className={styles.position}
+        className={`${styles.position}${isCreative ? ` ${styles.creativeHeader}` : ""}`}
         position="sticky"
         as="header"
         zIndex={9}
@@ -78,9 +83,10 @@ export const Header = () => {
         <Row fillWidth horizontal="center">
           <Row
             background="page"
+            className={isCreative ? styles.creativeNav : undefined}
             border="neutral-alpha-weak"
             radius="m-4"
-            shadow="l"
+            shadow={isCreative ? "m" : "l"}
             padding="4"
             horizontal="center"
             zIndex={1}
