@@ -6,8 +6,9 @@ export {
   home,
   about,
   blog,
-  work,
+  creative,
   gallery,
+  footerCopy,
 } from "./content";
 
 export {
@@ -23,4 +24,5 @@ export {
   socialSharing,
   effects,
   dataStyle,
+  activeThemePreset,
 } from "./once-ui.config";

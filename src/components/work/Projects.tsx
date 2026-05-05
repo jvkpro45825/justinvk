@@ -2,15 +2,26 @@ import { getPosts } from "@/utils/utils";
 import { Column } from "@once-ui-system/core";
 import { ProjectCard } from "@/components";
 
+const DEFAULT_POSTS_PATH = ["src", "app", "creative", "projects"];
+const DEFAULT_HREF_BASE = "/creative";
+
 interface ProjectsProps {
   range?: [number, number?];
   exclude?: string[];
+  /** MDX directory under project root (see `getPosts`) */
+  postsPath?: string[];
+  /** URL prefix for project detail links */
+  hrefBase?: string;
 }
 
-export function Projects({ range, exclude }: ProjectsProps) {
-  let allProjects = getPosts(["src", "app", "work", "projects"]);
+export function Projects({
+  range,
+  exclude,
+  postsPath = DEFAULT_POSTS_PATH,
+  hrefBase = DEFAULT_HREF_BASE,
+}: ProjectsProps) {
+  let allProjects = getPosts(postsPath);
 
-  // Exclude by slug (exact match)
   if (exclude && exclude.length > 0) {
     allProjects = allProjects.filter((post) => !exclude.includes(post.slug));
   }
@@ -29,7 +40,7 @@ export function Projects({ range, exclude }: ProjectsProps) {
         <ProjectCard
           priority={index < 2}
           key={post.slug}
-          href={`/work/${post.slug}`}
+          href={`${hrefBase}/${post.slug}`}
           images={post.metadata.images}
           title={post.metadata.title}
           description={post.metadata.summary}

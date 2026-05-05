@@ -11,10 +11,11 @@ import {
   Meta,
   Line,
 } from "@once-ui-system/core";
-import { home, about, person, baseURL, routes } from "@/resources";
+import { home, about, person, baseURL, routes, creative } from "@/resources";
 import { Mailchimp } from "@/components";
-import { Projects } from "@/components/work/Projects";
 import { Posts } from "@/components/blog/Posts";
+import { LearningTimeline } from "@/components/home/LearningTimeline";
+import { getPosts } from "@/utils/utils";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -27,6 +28,8 @@ export async function generateMetadata() {
 }
 
 export default function Home() {
+  const blogPosts = getPosts(["src", "app", "blog", "posts"]);
+
   return (
     <Column maxWidth="m" gap="xl" paddingY="12" horizontal="center">
       <Schema
@@ -75,35 +78,40 @@ export default function Home() {
               {home.subline}
             </Text>
           </RevealFx>
-          <RevealFx paddingTop="12" delay={0.4} horizontal="center" paddingLeft="12">
-            <Button
-              id="about"
-              data-border="rounded"
-              href={about.path}
-              variant="secondary"
-              size="m"
-              weight="default"
-              arrowIcon
-            >
-              <Row gap="8" vertical="center" paddingRight="4">
-                {about.avatar.display && (
-                  <Avatar
-                    marginRight="8"
-                    style={{ marginLeft: "-0.75rem" }}
-                    src={person.avatar}
-                    size="m"
-                  />
-                )}
-                {about.title}
-              </Row>
-            </Button>
+          <RevealFx paddingTop="12" delay={0.35} horizontal="center" fillWidth>
+            <LearningTimeline />
+          </RevealFx>
+          <RevealFx paddingTop="12" delay={0.45} horizontal="center" fillWidth gap="12">
+            <Row gap="12" wrap horizontal="center">
+              <Button
+                id="about"
+                data-border="rounded"
+                href={about.path}
+                variant="secondary"
+                size="m"
+                weight="default"
+                arrowIcon
+              >
+                <Row gap="8" vertical="center" paddingRight="4">
+                  {about.avatar.display && (
+                    <Avatar
+                      marginRight="8"
+                      style={{ marginLeft: "-0.75rem" }}
+                      src={person.avatar}
+                      size="m"
+                    />
+                  )}
+                  {about.label}
+                </Row>
+              </Button>
+              <Button data-border="rounded" href={creative.path} variant="secondary" size="m" arrowIcon>
+                {creative.label}
+              </Button>
+            </Row>
           </RevealFx>
         </Column>
       </Column>
-      <RevealFx translateY="16" delay={0.6}>
-        <Projects range={[1, 1]} />
-      </RevealFx>
-      {routes["/blog"] && (
+      {routes["/blog"] && blogPosts.length > 0 && (
         <Column fillWidth gap="24" marginBottom="l">
           <Row fillWidth paddingRight="64">
             <Line maxWidth={48} />
@@ -123,7 +131,6 @@ export default function Home() {
           </Row>
         </Column>
       )}
-      <Projects range={[2]} />
       <Mailchimp />
     </Column>
   );

@@ -1,12 +1,27 @@
-import { Row, IconButton, SmartLink, Text } from "@once-ui-system/core";
-import { person, social } from "@/resources";
+import { Column, Row, IconButton, SmartLink, Text } from "@once-ui-system/core";
+import { footerCopy, person, social } from "@/resources";
 import styles from "./Footer.module.scss";
 
 export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <Row as="footer" fillWidth padding="8" horizontal="center" s={{ direction: "column" }}>
+    <Column as="footer" fillWidth padding="8" horizontal="center" gap="16">
+      <Row
+        maxWidth="m"
+        paddingX="16"
+        horizontal="center"
+        s={{ direction: "column" }}
+      >
+        <Column gap="8" horizontal="center" maxWidth="m">
+          <Text variant="body-default-m" onBackground="neutral-weak" style={{ fontStyle: "italic" }}>
+            {footerCopy.tagline}
+          </Text>
+          <Text variant="body-default-s" onBackground="neutral-medium">
+            {footerCopy.cta}
+          </Text>
+        </Column>
+      </Row>
       <Row
         className={styles.mobile}
         maxWidth="m"
@@ -25,7 +40,6 @@ export const Footer = () => {
           <Text onBackground="neutral-weak">© {currentYear} /</Text>
           <Text paddingX="4">{person.name}</Text>
           <Text onBackground="neutral-weak">
-            {/* Usage of this template requires attribution. Please don't remove the link to Once UI unless you have a Pro license. */}
             / Build your portfolio with{" "}
             <SmartLink href="https://once-ui.com/products/magic-portfolio">Once UI</SmartLink>
           </Text>
@@ -47,6 +61,6 @@ export const Footer = () => {
         </Row>
       </Row>
       <Row height="80" hide s={{ hide: false }} />
-    </Row>
+    </Column>
   );
 };

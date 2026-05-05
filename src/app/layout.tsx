@@ -52,7 +52,7 @@ export default async function RootLayout({
               (function() {
                 try {
                   const root = document.documentElement;
-                  const defaultTheme = 'system';
+                  const defaultTheme = ${JSON.stringify(style.theme)};
                   
                   // Set defaults from config
                   const config = ${JSON.stringify({
@@ -81,9 +81,10 @@ export default async function RootLayout({
                     return themeValue;
                   };
                   
-                  // Apply saved theme
+                  // Apply saved theme (fallback to preset default from server config)
                   const savedTheme = localStorage.getItem('data-theme');
-                  const resolvedTheme = resolveTheme(savedTheme);
+                  const themePreference = savedTheme !== null && savedTheme !== '' ? savedTheme : defaultTheme;
+                  const resolvedTheme = resolveTheme(themePreference);
                   root.setAttribute('data-theme', resolvedTheme);
                   
                   // Apply any saved style overrides
