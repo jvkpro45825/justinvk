@@ -1,3 +1,737 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =============================================================================
+   "The short version" — premium dark-glass cards for the home page.
+
+   Per-card themes via [data-theme="cool|spectral|warm"]:
+     - cool      = teal / cyan / indigo (card 1, North Star)
+     - spectral  = full prism / magenta-rich (card 2, Now — center, strongest)
+     - warm      = amber / gold / coral / rose (card 3, Building Toward)
+
+   Layer stack per card (bottom to top, by z-index):
+     z-0  glass substrate (the .short-version-card element itself)
+     z-1  card content
+     z-2  static conic iridescence (no rotation — ambient prism tint)
+     z-3  static diagonal chromatic streaks (always visible)
+     z-4  one-shot launch sweep (runs once on page load, then vanishes)
+     z-5  static SVG noise grain
+   ========================================================================== */
+
+.short-version-noise-defs {
+  position: absolute;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.short-version-stage {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 80rem;
+  margin-inline: auto;
+  padding-inline: clamp(1rem, 3vw, 2rem);
+  padding-block: clamp(2rem, 4vw, 3.5rem);
+}
+
+/* Atmospheric blooms behind the card row — give the cards something to refract. */
+.short-version-bloom {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(80px);
+  opacity: 0.85;
+}
+
+.short-version-bloom--cool {
+  background: radial-gradient(
+    ellipse 65% 60% at 30% 50%,
+    rgba(80, 200, 220, 0.08) 0%,
+    rgba(60, 140, 200, 0.05) 35%,
+    transparent 70%
+  );
+}
+
+.short-version-bloom--warm {
+  background: radial-gradient(
+    ellipse 50% 55% at 75% 60%,
+    rgba(255, 200, 140, 0.07) 0%,
+    rgba(255, 140, 100, 0.04) 40%,
+    transparent 75%
+  );
+}
+
+.short-version-grid {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+@media (min-width: 768px) {
+  .short-version-grid {
+    grid-template-columns: repeat(3, 1fr);
+    align-items: stretch;
+  }
+}
+
+/* ---- Card material (the obsidian glass base) ----------------------------- */
+
+.short-version-card {
+  --launch-delay: 0s;
+
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 1.125rem;
+  padding: clamp(1.75rem, 2.6vw, 2.5rem) clamp(1.5rem, 2.5vw, 2.5rem);
+  background: rgba(0, 0, 0, 0.30);
+  -webkit-backdrop-filter: blur(20px) saturate(140%);
+  backdrop-filter: blur(20px) saturate(140%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.10),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.40),
+    inset 0 0 60px rgba(100, 140, 200, 0.05),
+    0 8px 40px rgba(20, 30, 80, 0.20),
+    0 2px 8px rgba(0, 0, 0, 0.30);
+  transition:
+    transform 320ms cubic-bezier(0.2, 0.8, 0.2, 1),
+    box-shadow 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  min-height: 18rem;
+}
+
+@media (min-width: 768px) {
+  .short-version-card {
+    min-height: 26rem;
+    aspect-ratio: 3 / 4;
+  }
+}
+
+.short-version-card[data-center="true"] {
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.short-version-card:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.14),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.42),
+    inset 0 0 70px rgba(120, 160, 220, 0.08),
+    0 12px 48px rgba(20, 30, 80, 0.28),
+    0 3px 10px rgba(0, 0, 0, 0.34);
+}
+
+/* ---- Per-card themes ----------------------------------------------------- */
+
+.short-version-card[data-theme="cool"] {
+  --iridescence-conic: conic-gradient(
+    from 200deg at 50% 50%,
+    rgba(20, 60, 90, 0.42),
+    rgba(40, 160, 200, 0.38),
+    rgba(80, 240, 220, 0.34),
+    rgba(60, 140, 220, 0.40),
+    rgba(120, 120, 220, 0.30),
+    rgba(20, 60, 90, 0.42)
+  );
+  --streak-1: rgba(80, 240, 220, 0.22);
+  --streak-2: rgba(120, 220, 255, 0.20);
+  --streak-3: rgba(160, 180, 255, 0.18);
+  --streak-4: rgba(80, 200, 220, 0.16);
+  --edge-bloom-color: rgba(120, 220, 220, 0.12);
+  --iridescence-opacity: 0.52;
+}
+
+.short-version-card[data-theme="spectral"] {
+  --iridescence-conic: conic-gradient(
+    from 0deg at 50% 50%,
+    rgba(20, 40, 120, 0.45),
+    rgba(60, 180, 255, 0.40),
+    rgba(80, 255, 255, 0.35),
+    rgba(160, 90, 255, 0.45),
+    rgba(255, 80, 180, 0.40),
+    rgba(255, 180, 80, 0.35),
+    rgba(20, 40, 120, 0.45)
+  );
+  --streak-1: rgba(120, 220, 255, 0.24);
+  --streak-2: rgba(255, 240, 140, 0.20);
+  --streak-3: rgba(255, 140, 200, 0.22);
+  --streak-4: rgba(180, 140, 255, 0.24);
+  --edge-bloom-color: rgba(180, 160, 255, 0.16);
+  --iridescence-opacity: 0.74;
+}
+
+.short-version-card[data-theme="warm"] {
+  --iridescence-conic: conic-gradient(
+    from 30deg at 50% 50%,
+    rgba(80, 30, 30, 0.45),
+    rgba(255, 160, 90, 0.42),
+    rgba(255, 220, 140, 0.36),
+    rgba(255, 120, 150, 0.42),
+    rgba(180, 80, 100, 0.32),
+    rgba(80, 30, 30, 0.45)
+  );
+  --streak-1: rgba(255, 220, 140, 0.22);
+  --streak-2: rgba(255, 170, 100, 0.20);
+  --streak-3: rgba(255, 130, 170, 0.18);
+  --streak-4: rgba(255, 200, 150, 0.16);
+  --edge-bloom-color: rgba(255, 180, 140, 0.14);
+  --iridescence-opacity: 0.55;
+}
+
+/* ---- Edge bloom (soft halo just outside each card) ----------------------- */
+
+.short-version-card-edge-bloom {
+  position: absolute;
+  inset: -6px;
+  border-radius: 1.3rem;
+  background: radial-gradient(
+    closest-side,
+    var(--edge-bloom-color, rgba(140, 170, 255, 0.10)),
+    transparent 70%
+  );
+  filter: blur(20px);
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.9;
+  transition: opacity 320ms ease-out;
+}
+
+.short-version-card:hover .short-version-card-edge-bloom {
+  opacity: 1;
+}
+
+/* ---- Iridescence (z-2 — static prismatic backdrop) ----------------------- */
+
+.short-version-card-iridescence {
+  position: absolute;
+  inset: -20%;
+  z-index: 2;
+  pointer-events: none;
+  background: var(--iridescence-conic);
+  filter: blur(40px);
+  mix-blend-mode: overlay;
+  opacity: var(--iridescence-opacity, 0.55);
+  transition: opacity 320ms ease-out;
+}
+
+.short-version-card:hover .short-version-card-iridescence {
+  opacity: calc(var(--iridescence-opacity, 0.55) + 0.08);
+}
+
+/* ---- Static diagonal chromatic streaks (z-3 — always visible at rest) ---- */
+
+.short-version-card-streaks {
+  position: absolute;
+  inset: -4%;
+  z-index: 3;
+  pointer-events: none;
+  background:
+    linear-gradient(115deg, transparent 26%, var(--streak-1) 32%, transparent 38%),
+    linear-gradient(115deg, transparent 34%, var(--streak-2) 40%, transparent 46%),
+    linear-gradient(115deg, transparent 42%, var(--streak-3) 48%, transparent 54%),
+    linear-gradient(115deg, transparent 50%, var(--streak-4) 56%, transparent 62%);
+  filter: blur(14px);
+  mix-blend-mode: screen;
+  transition: opacity 320ms ease-out;
+}
+
+.short-version-card[data-center="true"] .short-version-card-streaks {
+  filter: blur(12px);
+}
+
+.short-version-card:hover .short-version-card-streaks {
+  opacity: 1.05;
+}
+
+/* ---- One-shot launch sweep (z-4 — fires once on page load) --------------- */
+
+.short-version-card-launch-sweep {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  pointer-events: none;
+  background: linear-gradient(
+    115deg,
+    transparent 0%,
+    transparent 38%,
+    rgba(255, 255, 255, 0.08) 46%,
+    rgba(220, 240, 255, 0.20) 50%,
+    rgba(255, 255, 255, 0.08) 54%,
+    transparent 62%,
+    transparent 100%
+  );
+  background-size: 250% 100%;
+  background-position: -150% 0;
+  filter: blur(8px);
+  mix-blend-mode: screen;
+  opacity: 0;
+  animation: short-version-launch 4.5s ease-out 1 forwards;
+  animation-delay: var(--launch-delay);
+}
+
+@keyframes short-version-launch {
+  0% {
+    background-position: -150% 0;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  60% {
+    background-position: 180% 0;
+    opacity: 1;
+  }
+  78% {
+    opacity: 0;
+  }
+  100% {
+    background-position: 250% 0;
+    opacity: 0;
+  }
+}
+
+/* ---- Noise grain (z-5 — static realism layer) ---------------------------- */
+
+.short-version-card-noise {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  filter: url(#short-version-noise-filter) contrast(120%) brightness(80%);
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+}
+
+/* Fallback noise via tiny inline SVG background image — runs alongside the
+   SVG <filter> on the parent, harmless when both render. */
+.short-version-card-noise::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.6 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  opacity: 0.6;
+  mix-blend-mode: overlay;
+}
+
+/* ---- Card content (z-1) -------------------------------------------------- */
+
+.short-version-card-content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  height: 100%;
+}
+
+.short-version-card-label {
+  margin: 0;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.short-version-card-title {
+  margin: 0;
+  margin-top: 0.25rem;
+  font-family: var(--font-heading), Georgia, serif;
+  font-size: clamp(1.625rem, 2.6vw, 2.125rem);
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: rgba(255, 255, 255, 0.96);
+  font-weight: 600;
+}
+
+.short-version-card-title::after {
+  content: "";
+  display: block;
+  width: 2rem;
+  height: 1px;
+  margin-top: 0.875rem;
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.short-version-card-body {
+  margin: 0;
+  margin-top: 0.5rem;
+  font-size: clamp(0.95rem, 1.1vw, 1.05rem);
+  line-height: 1.55;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 32ch;
+}
+
+/* ---- Reduced motion + low-power mobile fallback -------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .short-version-card-launch-sweep {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .short-version-card-launch-sweep {
+    animation: none;
+    opacity: 0;
+  }
+  .short-version-card-iridescence {
+    opacity: calc(var(--iridescence-opacity, 0.55) * 0.7);
+    filter: blur(32px);
+  }
+  .short-version-card-streaks {
+    filter: blur(11px);
+  }
+}
+
+.timeline-pin-spacer {
+  position: relative;
+  width: 100%;
+}
+
+.timeline-pin-sticky {
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+.timeline-wheel {
+  transform-style: preserve-3d;
+  perspective: 900px;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 20%,
+    black 80%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 20%,
+    black 80%,
+    transparent 100%
+  );
+}
+
+.timeline-track {
+  padding-block: calc((var(--timeline-wheel-height) - var(--timeline-row-height)) / 2);
+  padding-inline: clamp(4rem, 18vw, 18rem) clamp(1.5rem, 8vw, 8rem);
+  will-change: transform;
+}
+
+.timeline-stage {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  width: 100%;
+}
+
+.timeline-wheel-full {
+  --timeline-wheel-height: clamp(440px, 86svh, 1100px);
+  --timeline-row-height: calc(100svh / 12);
+  height: var(--timeline-wheel-height);
+  min-height: 440px;
+}
+
+.timeline-picker-shell {
+  background: transparent;
+}
+
+.timeline-center-window {
+  background: transparent;
+  border-color: rgba(164, 66, 0, 0.42) !important;
+  box-shadow:
+    0 0 0 1px rgba(164, 66, 0, 0.16) inset,
+    0 0 42px rgba(164, 66, 0, 0.18);
+}
+
+.timeline-ruler-copy {
+  text-shadow: 0 1px 18px var(--page-background);
+}
+
+.timeline-ruler-spine {
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    rgba(164, 66, 0, 0.5) 18%,
+    rgba(164, 66, 0, 0.7) 50%,
+    rgba(164, 66, 0, 0.5) 82%,
+    transparent
+  );
+}
+
+.timeline-hashmarks {
+  background-image:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent 11px,
+      rgba(164, 66, 0, 0.45) 11px,
+      rgba(164, 66, 0, 0.45) 12px
+    );
+  -webkit-mask-image: linear-gradient(to bottom, transparent, black 16%, black 84%, transparent);
+  mask-image: linear-gradient(to bottom, transparent, black 16%, black 84%, transparent);
+}
+
+.timeline-wheel-mark {
+  --timeline-proximity: 0;
+  --timeline-offset: 0;
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: #a44200;
+  height: var(--timeline-row-height);
+  min-height: 32px;
+  -webkit-user-select: none;
+  user-select: none;
+  opacity: calc(0.3 + (var(--timeline-proximity) * 0.7));
+  transform:
+    perspective(900px)
+    rotateX(calc(var(--timeline-offset) * -48deg))
+    translateZ(calc(var(--timeline-proximity) * 44px))
+    scale(calc(0.78 + (var(--timeline-proximity) * 0.28)));
+  transform-origin: center;
+  transition:
+    opacity 120ms ease-out,
+    transform 120ms ease-out,
+    color 120ms ease-out;
+}
+
+.timeline-ruler-tick {
+  display: block;
+  height: 1px;
+  width: calc(4vw + (var(--timeline-proximity) * 1vw));
+  max-width: 5rem;
+  min-width: 2rem;
+  background: currentColor;
+  opacity: calc(0.45 + (var(--timeline-proximity) * 0.55));
+  transform:
+    translate3d(0, 0, 0)
+    scaleY(calc(1 + (var(--timeline-proximity) * 1.8)));
+  transform-origin: left center;
+  transition:
+    opacity 120ms ease-out,
+    transform 120ms ease-out,
+    width 120ms ease-out;
+}
+
+.timeline-ruler-tick-quarter {
+  width: calc(6vw + (var(--timeline-proximity) * 1.5vw));
+  max-width: 7rem;
+  min-width: 3rem;
+}
+
+.timeline-ruler-tick-year {
+  width: calc(13vw + (var(--timeline-proximity) * 3vw));
+  max-width: 15rem;
+  min-width: 6.5rem;
+  height: 2px;
+  background: #ffffff;
+  opacity: calc(0.65 + (var(--timeline-proximity) * 0.35));
+}
+
+.timeline-ruler-tick-major {
+  width: calc(16vw + (var(--timeline-proximity) * 3vw));
+  max-width: 18rem;
+  min-width: 8rem;
+  height: 3px;
+  background: #ffffff;
+  opacity: calc(0.75 + (var(--timeline-proximity) * 0.25));
+  box-shadow: 0 0 22px rgba(255, 255, 255, 0.3);
+}
+
+.timeline-ruler-tick-chapter {
+  width: calc(10vw + (var(--timeline-proximity) * 2vw));
+  max-width: 12rem;
+  min-width: 5rem;
+  height: 2px;
+  background: #ffffff;
+  opacity: calc(0.55 + (var(--timeline-proximity) * 0.4));
+}
+
+.timeline-year-label {
+  color: #ffffff;
+  font-size: 2.25rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.025em;
+  line-height: 1;
+}
+
+.timeline-year-label-major {
+  font-size: 3rem;
+  font-weight: 700;
+}
+
+.timeline-chapter-label {
+  color: #ffffff;
+  font-size: 1.5rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.025em;
+  line-height: 1;
+}
+
+.timeline-active-chapter {
+  display: grid;
+  max-width: clamp(16rem, 32vw, 36rem);
+  pointer-events: auto;
+  cursor: text;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.timeline-active-chapter-pane {
+  position: relative;
+  pointer-events: none;
+}
+
+.timeline-active-chapter-pane[data-active="true"] {
+  pointer-events: auto;
+  z-index: 1;
+}
+
+.timeline-active-chapter-pane[data-active="true"],
+.timeline-active-chapter-pane[data-active="true"] * {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.timeline-active-chapter-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.625rem;
+  pointer-events: auto;
+}
+
+.timeline-active-chapter-period,
+.timeline-active-chapter-title,
+.timeline-active-chapter-body {
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.timeline-active-chapter-thumb-wrap {
+  align-self: flex-start;
+  width: 14rem;
+  height: 8.5rem;
+  flex-shrink: 0;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  border: 1px solid rgba(164, 66, 0, 0.25);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
+.timeline-active-chapter-thumb {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.timeline-active-chapter-period {
+  margin: 0;
+  align-self: flex-start;
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(164, 66, 0, 0.92);
+  line-height: 1.2;
+  padding-bottom: 0.125rem;
+  border-bottom: 1px solid rgba(164, 66, 0, 0.35);
+}
+
+.timeline-active-chapter-title {
+  margin: 0;
+  font-size: clamp(1.375rem, 2.6vw, 1.875rem);
+  font-weight: 650;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: inherit;
+}
+
+.timeline-active-chapter-body {
+  margin: 0;
+  margin-top: 0.125rem;
+  font-size: clamp(0.9375rem, 1.35vw, 1.0625rem);
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  line-height: 1.55;
+  color: inherit;
+  opacity: 0.72;
+  max-width: 42rem;
+}
+
+.timeline-active-chapter-pane {
+  grid-column: 1;
+  grid-row: 1;
+  opacity: 0;
+  transform: translateY(14px);
+  transition:
+    opacity 360ms ease-out,
+    transform 360ms ease-out;
+}
+
+.timeline-active-chapter-pane[data-active="true"] {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.timeline-details-glow {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .timeline-wheel-mark,
+  .timeline-ruler-tick {
+    transition: none;
+    transform: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .timeline-stage {
+    min-height: 72svh;
+  }
+
+  .timeline-ruler-tick {
+    min-width: 1.75rem;
+  }
+
+  .timeline-ruler-tick-quarter {
+    min-width: 2.5rem;
+  }
+
+  .timeline-ruler-tick-year {
+    min-width: 5.25rem;
+  }
+
+  .timeline-ruler-tick-major {
+    min-width: 6.5rem;
+  }
+
+  .timeline-active-chapter {
+    left: 8rem;
+    right: 1rem;
+  }
+}
+
 /* :root {
   /*
   /* Override default variables here */

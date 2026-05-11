@@ -9,13 +9,9 @@ import {
   Row,
   Schema,
   Meta,
-  Line,
 } from "@once-ui-system/core";
-import { home, about, person, baseURL, routes, creative } from "@/resources";
-import { Mailchimp } from "@/components";
-import { Posts } from "@/components/blog/Posts";
-import { LearningTimeline } from "@/components/home/LearningTimeline";
-import { getPosts } from "@/utils/utils";
+import { home, about, person, baseURL, creative } from "@/resources";
+import TheShortVersion from "@/components/home/TheShortVersion";
 
 export async function generateMetadata() {
   return Meta.generate({
@@ -28,10 +24,8 @@ export async function generateMetadata() {
 }
 
 export default function Home() {
-  const blogPosts = getPosts(["src", "app", "blog", "posts"]);
-
   return (
-    <Column maxWidth="m" gap="xl" paddingY="12" horizontal="center">
+    <Column fillWidth gap="xl" paddingY="12" horizontal="center">
       <Schema
         as="webPage"
         baseURL={baseURL}
@@ -78,9 +72,11 @@ export default function Home() {
               {home.subline}
             </Text>
           </RevealFx>
-          <RevealFx paddingTop="12" delay={0.35} horizontal="center" fillWidth>
-            <LearningTimeline />
-          </RevealFx>
+        </Column>
+        <RevealFx translateY="8" delay={0.35} fillWidth horizontal="center">
+          <TheShortVersion />
+        </RevealFx>
+        <Column maxWidth="s" horizontal="center" align="center">
           <RevealFx paddingTop="12" delay={0.45} horizontal="center" fillWidth gap="12">
             <Row gap="12" wrap horizontal="center">
               <Button
@@ -111,27 +107,6 @@ export default function Home() {
           </RevealFx>
         </Column>
       </Column>
-      {routes["/blog"] && blogPosts.length > 0 && (
-        <Column fillWidth gap="24" marginBottom="l">
-          <Row fillWidth paddingRight="64">
-            <Line maxWidth={48} />
-          </Row>
-          <Row fillWidth gap="24" marginTop="40" s={{ direction: "column" }}>
-            <Row flex={1} paddingLeft="l" paddingTop="24">
-              <Heading as="h2" variant="display-strong-xs" wrap="balance">
-                Latest from the blog
-              </Heading>
-            </Row>
-            <Row flex={3} paddingX="20">
-              <Posts range={[1, 2]} columns="2" />
-            </Row>
-          </Row>
-          <Row fillWidth paddingLeft="64" horizontal="end">
-            <Line maxWidth={48} />
-          </Row>
-        </Column>
-      )}
-      <Mailchimp />
     </Column>
   );
 }

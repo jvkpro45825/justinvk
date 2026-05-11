@@ -8,6 +8,7 @@ export {
   blog,
   creative,
   gallery,
+  shortVersion,
   footerCopy,
 } from "./content";
 

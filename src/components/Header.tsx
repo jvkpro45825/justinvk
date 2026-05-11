@@ -91,7 +91,13 @@ export const Header = () => {
             horizontal="center"
             zIndex={1}
           >
-            <Row gap="4" vertical="center" textVariant="body-default-s" suppressHydrationWarning>
+            <Row
+              gap="12"
+              vertical="center"
+              textVariant="body-default-s"
+              suppressHydrationWarning
+              s={{ gap: "12px" }}
+            >
               {routes["/"] && (
                 <ToggleButton prefixIcon="home" href="/" selected={pathname === "/"} />
               )}

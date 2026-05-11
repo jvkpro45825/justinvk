@@ -15,6 +15,7 @@ import {
 import { baseURL, about, person, social } from "@/resources";
 import TableOfContents from "@/components/about/TableOfContents";
 import styles from "@/components/about/about.module.scss";
+import LearningTimeline from "@/components/home/LearningTimeline";
 import React from "react";
 
 export async function generateMetadata() {
@@ -49,8 +50,14 @@ export default function About() {
       display: about.technical.display,
       items: about.technical.skills.map((skill) => skill.title),
     },
+    {
+      title: "The long version",
+      display: true,
+      items: [],
+    },
   ];
   return (
+    <Column fillWidth horizontal="center">
     <Column maxWidth="m">
       <Schema
         as="webPage"
@@ -65,18 +72,6 @@ export default function About() {
           image: `${baseURL}${person.avatar}`,
         }}
       />
-      {about.tableOfContent.display && (
-        <Column
-          left="0"
-          style={{ top: "50%", transform: "translateY(-50%)" }}
-          position="fixed"
-          paddingLeft="24"
-          gap="32"
-          s={{ hide: true }}
-        >
-          <TableOfContents structure={structure} about={about} />
-        </Column>
-      )}
       <Row fillWidth s={{ direction: "column"}} horizontal="center">
         {about.avatar.display && (
           <Column
@@ -107,9 +102,15 @@ export default function About() {
                 ))}
               </Row>
             )}
+            {about.tableOfContent.display && (
+              <TableOfContents structure={structure} about={about} />
+            )}
           </Column>
         )}
         <Column className={styles.blockAlign} flex={9} maxWidth={40}>
+          {!about.avatar.display && about.tableOfContent.display && (
+            <TableOfContents structure={structure} about={about} placement="main" />
+          )}
           <Column
             id={about.intro.title}
             fillWidth
@@ -337,6 +338,19 @@ export default function About() {
           )}
         </Column>
       </Row>
+    </Column>
+
+    <Column fillWidth horizontal="center" marginTop="64" id="The long version">
+      <Column maxWidth="m" paddingX="l" marginBottom="m" gap="8">
+        <Heading as="h2" variant="display-strong-s">
+          The long version
+        </Heading>
+        <Text onBackground="neutral-weak" variant="body-default-m">
+          A scrollable timeline of how I got here, month by month.
+        </Text>
+      </Column>
+      <LearningTimeline />
+    </Column>
     </Column>
   );
 }

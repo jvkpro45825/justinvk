@@ -16,9 +16,15 @@ interface TableOfContentsProps {
       subItems: boolean;
     };
   };
+  /** Default: left rail under avatar. Use `main` when the avatar column is hidden. */
+  placement?: "sidebar" | "main";
 }
 
-const TableOfContents: React.FC<TableOfContentsProps> = ({ structure, about }) => {
+const TableOfContents: React.FC<TableOfContentsProps> = ({
+  structure,
+  about,
+  placement = "sidebar",
+}) => {
   const scrollTo = (id: string, offset: number) => {
     const element = document.getElementById(id);
     if (element) {
@@ -34,18 +40,18 @@ const TableOfContents: React.FC<TableOfContentsProps> = ({ structure, about }) =
 
   if (!about.tableOfContent.display) return null;
 
+  const rootClass =
+    placement === "main"
+      ? `${styles.tocSidebar} ${styles.tocSidebarMain}`
+      : styles.tocSidebar;
+
   return (
     <Column
-      left="0"
-      style={{
-        top: "50%",
-        transform: "translateY(-50%)",
-        whiteSpace: "nowrap",
-      }}
-      position="fixed"
-      paddingLeft="24"
-      gap="32"
-      m={{ hide: true }}
+      fillWidth
+      className={rootClass}
+      gap="12"
+      marginTop={placement === "main" ? "0" : "16"}
+      horizontal="start"
     >
       {structure
         .filter((section) => section.display)

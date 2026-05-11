@@ -192,7 +192,9 @@ const about: About = {
           <>
             Working through CS50P (currently Week {cs50pWeekCurrent}), documenting the messy middle —
             update your week in{" "}
-            <Text variant="label-default-m">src/resources/learningTimeline.ts</Text>.
+            <Text variant="label-default-m">src/resources/learningTimeline.ts</Text> (
+            <Text variant="label-default-m">cs50pWeekCurrent</Text>
+            ).
           </>,
           <>
             Building with tools my org already uses: Power BI, Power Automate, and Excel — proof that I
@@ -265,6 +267,54 @@ const about: About = {
   },
 };
 
+/**
+ * Home page "The short version" cards.
+ *
+ * Three glass cards summarizing where I am, where I am going, and what I am
+ * building toward. Edit the copy here; styling lives in
+ * `src/components/home/TheShortVersion.tsx` + `src/resources/custom.css`.
+ */
+export type ShortVersionCard = {
+  label: string;
+  title: string;
+  body: React.ReactNode;
+};
+
+const shortVersion: ShortVersionCard[] = [
+  {
+    label: "North Star",
+    title: "QA Automation & SDET",
+    body: (
+      <>
+        Quality engineering in software — automation, tests that earn trust, and
+        the craft of breaking things on purpose so users don&apos;t have to.
+      </>
+    ),
+  },
+  {
+    label: "Now",
+    title: "CS50P, with a stricter bar",
+    body: (
+      <>
+        Around Week {cs50pWeekCurrent} of Harvard&apos;s CS50P. After each
+        problem set, a strict AI mentor scores my code 0–4 for hireability and
+        asks for a test file. I keep iterating until I hit 4/4.
+      </>
+    ),
+  },
+  {
+    label: "Building Toward",
+    title: "Asteroid locator (NASA NEO API)",
+    body: (
+      <>
+        A small Python tool that flags near-Earth asteroids likely to make close
+        approaches. Public repo targeting July 2026; applications go out in
+        August.
+      </>
+    ),
+  },
+];
+
 const blog: Blog = {
   path: "/blog",
   label: "Blog",
@@ -328,4 +378,4 @@ const gallery: Gallery = {
   ],
 };
 
-export { person, social, newsletter, home, about, blog, creative, gallery };
+export { person, social, newsletter, home, about, blog, creative, gallery, shortVersion };
