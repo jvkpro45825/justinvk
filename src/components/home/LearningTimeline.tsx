@@ -381,7 +381,7 @@ export default function LearningTimeline() {
         <div className="timeline-pin-sticky">
           <div ref={stageRef} className="timeline-stage mt-6 w-screen">
             <div
-              className="timeline-center-window pointer-events-none absolute left-0 right-0 top-1/2 z-[4] h-24 -translate-y-1/2 border-y border-brand-alpha-medium"
+              className="timeline-center-window pointer-events-none absolute top-1/2 z-[4] h-20 -translate-y-1/2 border-y border-brand-alpha-medium"
               aria-hidden
             />
             <div

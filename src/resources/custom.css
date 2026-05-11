@@ -451,12 +451,24 @@
   background: transparent;
 }
 
+/* “Now” band: keep it over the month ruler only so borders/glow don’t run through chapter copy */
 .timeline-center-window {
+  --timeline-ruler-inset: clamp(4rem, 18vw, 18rem);
+  --timeline-chapter-start: clamp(28rem, 50vw, 50rem);
   background: transparent;
   border-color: rgba(164, 66, 0, 0.42) !important;
+  left: var(--timeline-ruler-inset);
+  right: auto;
+  width: max(
+    7.5rem,
+    min(
+      calc(var(--timeline-chapter-start) - var(--timeline-ruler-inset) - 0.75rem),
+      42vw
+    )
+  );
   box-shadow:
-    0 0 0 1px rgba(164, 66, 0, 0.16) inset,
-    0 0 42px rgba(164, 66, 0, 0.18);
+    0 0 0 1px rgba(164, 66, 0, 0.12) inset,
+    0 0 28px rgba(164, 66, 0, 0.12);
 }
 
 .timeline-ruler-copy {
@@ -729,6 +741,15 @@
   .timeline-active-chapter {
     left: 8rem;
     right: 1rem;
+  }
+
+  .timeline-center-window {
+    --timeline-ruler-inset: clamp(2.5rem, 8vw, 4rem);
+    --timeline-chapter-start: 8rem;
+    width: max(
+      3.5rem,
+      calc(var(--timeline-chapter-start) - var(--timeline-ruler-inset) - 0.75rem)
+    );
   }
 }
 
