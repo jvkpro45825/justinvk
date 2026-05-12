@@ -278,15 +278,15 @@
     calc(var(--beam-angle, 115deg) + 90deg),
     transparent 0,
     black var(--rainbow-start, 20%),
-    black calc(var(--rainbow-start, 20%) + var(--rainbow-length, 50%)),
-    transparent calc(var(--rainbow-start, 20%) + var(--rainbow-length, 50%) + 8%)
+    black calc(var(--rainbow-start, 20%) + var(--rainbow-length, 50%) - 4%),
+    transparent calc(var(--rainbow-start, 20%) + var(--rainbow-length, 50%) + 18%)
   );
   mask-image: linear-gradient(
     calc(var(--beam-angle, 115deg) + 90deg),
     transparent 0,
     black var(--rainbow-start, 20%),
-    black calc(var(--rainbow-start, 20%) + var(--rainbow-length, 50%)),
-    transparent calc(var(--rainbow-start, 20%) + var(--rainbow-length, 50%) + 8%)
+    black calc(var(--rainbow-start, 20%) + var(--rainbow-length, 50%) - 4%),
+    transparent calc(var(--rainbow-start, 20%) + var(--rainbow-length, 50%) + 18%)
   );
   filter: blur(4.2px) saturate(1.15);
   mix-blend-mode: screen;
