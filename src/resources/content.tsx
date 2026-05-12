@@ -75,14 +75,14 @@ const home: Home = {
     display: true,
     title: (
       <Row gap="12" vertical="center">
-        <strong className="ml-4">Creative</strong>{" "}
+        <strong className="ml-4">GitHub</strong>{" "}
         <Line background="brand-alpha-strong" vert height="20" />
         <Text marginRight="4" onBackground="brand-medium">
-          Video reel
+          Profile
         </Text>
       </Row>
     ),
-    href: "/creative/reel-2024",
+    href: "https://github.com/jvkpro45825",
   },
   subline: (
     <>

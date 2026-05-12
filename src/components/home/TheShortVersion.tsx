@@ -14,7 +14,15 @@ export default function TheShortVersion() {
       className="short-version-stage"
       aria-label="The short version — a summary of where I am and where I'm going"
     >
-      <div className="short-version-bloom short-version-bloom--floor" aria-hidden />
+      <div className="short-version-bloom short-version-bloom-floor" aria-hidden>
+        {[0, 1, 2].map((slot) => (
+          <div
+            key={slot}
+            className="short-version-bloom-floor-slot"
+            data-floor-slot={slot}
+          />
+        ))}
+      </div>
 
       <div className="short-version-grid">
         {shortVersion.map((card, index) => {

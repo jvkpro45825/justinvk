@@ -15,6 +15,7 @@
    Per-card variables come from [data-beam-slot="0|1|2"]:
      --beam-angle / --beam-pos / --beam-intensity / --rainbow-length /
      --rainbow-start / --launch-delay
+   --beam-glow-anchor is derived on .short-version-card (lines up glow with prism end).
    ========================================================================== */
 
 .short-version-stage {
@@ -28,40 +29,137 @@
 }
 
 /* Atmospheric bloom behind the card row — ground reflection plane.
-   The floor carries:
-     - a base warm-to-cool reflective haze the row sits on
-     - per-card warm + cool spills aligned roughly with each card's column
-     - a brighter chromatic spill under the center card (matching its hotter beam) */
+   Uses the same grid as .short-version-grid so hotspots sit inside each column.
+   --floor-hotspot-x nudges the spill horizontally to match where each diagonal
+   prism exits the bottom edge of its glass pane (beam angle + slot differ). */
 .short-version-bloom {
   position: absolute;
   pointer-events: none;
   z-index: 0;
 }
 
-.short-version-bloom--floor {
+.short-version-bloom-floor {
   inset: auto 0 -6% 0;
   height: 55%;
-  background:
-    /* Card 1 spill (left column ~16%): warm + cool dispersion */
-    radial-gradient(ellipse 5% 70% at 14% 100%, rgba(255, 195, 140, 0.11) 0%, transparent 70%),
-    radial-gradient(ellipse 5% 80% at 18% 100%, rgba(170, 205, 255, 0.09) 0%, transparent 70%),
-    /* Card 2 spill (center ~50%): brightest + full chromatic spread */
-    radial-gradient(ellipse 3% 70% at 46% 100%, rgba(255, 130, 80, 0.12) 0%, transparent 75%),
-    radial-gradient(ellipse 3% 70% at 48% 100%, rgba(255, 210, 100, 0.12) 0%, transparent 75%),
-    radial-gradient(ellipse 8% 95% at 50% 100%, rgba(255, 250, 230, 0.20) 0%, transparent 65%),
-    radial-gradient(ellipse 3% 70% at 52% 100%, rgba(90, 200, 255, 0.13) 0%, transparent 75%),
-    radial-gradient(ellipse 3% 70% at 54% 100%, rgba(150, 110, 255, 0.11) 0%, transparent 75%),
-    /* Card 3 spill (right column ~84%) */
-    radial-gradient(ellipse 5% 70% at 82% 100%, rgba(255, 195, 140, 0.10) 0%, transparent 70%),
-    radial-gradient(ellipse 5% 80% at 86% 100%, rgba(170, 205, 255, 0.11) 0%, transparent 70%),
-    /* Base floor — warm-to-cool wash that anchors the row to a plane */
-    radial-gradient(
-      ellipse 75% 100% at 50% 100%,
-      rgba(200, 180, 140, 0.12) 0%,
-      rgba(120, 140, 180, 0.07) 35%,
-      transparent 78%
-    );
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: clamp(1.25rem, 2vw, 1.75rem);
+  align-items: stretch;
   filter: blur(28px);
+  /* Base wash across the row */
+  background: radial-gradient(
+    ellipse 75% 100% at 50% 100%,
+    rgba(200, 180, 140, 0.12) 0%,
+    rgba(120, 140, 180, 0.07) 35%,
+    transparent 78%
+  );
+}
+
+@media (max-width: 767px) {
+  /*
+    Single-column card stack; keep one blurred floor layer centered like before.
+    (Per-column hotspots only apply beside the desktop 3-column layout.)
+   */
+  .short-version-bloom-floor {
+    display: block;
+    position: relative;
+  }
+
+  .short-version-bloom-floor-slot:nth-child(n + 2) {
+    display: none;
+  }
+
+  .short-version-bloom-floor-slot[data-floor-slot="0"] {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .short-version-bloom-floor-slot[data-floor-slot="0"]::before {
+    inset: auto 0 0 0;
+    height: 100%;
+    background:
+      radial-gradient(ellipse 5% 70% at 30% 100%, rgba(255, 195, 140, 0.09) 0%, transparent 70%),
+      radial-gradient(ellipse 8% 85% at 52% 100%, rgba(255, 245, 220, 0.14) 0%, transparent 65%),
+      radial-gradient(ellipse 5% 70% at 72% 100%, rgba(170, 205, 255, 0.09) 0%, transparent 70%);
+  }
+}
+
+@media (min-width: 768px) {
+  .short-version-bloom-floor {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.short-version-bloom-floor-slot {
+  --floor-hotspot-x: calc(50% + var(--floor-hotspot-shift, 0%));
+  position: relative;
+  pointer-events: none;
+  min-height: 1px;
+}
+
+/* Hotspot drift vs column center follows each card’s prism / beam-slot (mirrors src custom.css beams). */
+.short-version-bloom-floor-slot[data-floor-slot="0"] {
+  --floor-hotspot-shift: 12%;
+}
+
+.short-version-bloom-floor-slot[data-floor-slot="1"] {
+  --floor-hotspot-shift: -16%;
+}
+
+.short-version-bloom-floor-slot[data-floor-slot="2"] {
+  --floor-hotspot-shift: -12%;
+}
+
+.short-version-bloom-floor-slot[data-floor-slot="1"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 130% 95% at var(--floor-hotspot-x) 100%,
+      rgba(255, 130, 80, 0.13) 0%,
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 130% 95% at calc(var(--floor-hotspot-x) + 2%) 100%,
+      rgba(255, 210, 100, 0.13) 0%,
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 160% 100% at var(--floor-hotspot-x) 100%,
+      rgba(255, 250, 230, 0.22) 0%,
+      transparent 62%
+    ),
+    radial-gradient(
+      ellipse 130% 95% at calc(var(--floor-hotspot-x) + 3%) 100%,
+      rgba(90, 200, 255, 0.14) 0%,
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 130% 95% at calc(var(--floor-hotspot-x) + 6%) 100%,
+      rgba(150, 110, 255, 0.12) 0%,
+      transparent 72%
+    );
+}
+
+.short-version-bloom-floor-slot[data-floor-slot="0"]::before,
+.short-version-bloom-floor-slot[data-floor-slot="2"]::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 120% 90% at calc(var(--floor-hotspot-x) - 5%) 100%,
+      rgba(255, 195, 140, 0.12) 0%,
+      transparent 72%
+    ),
+    radial-gradient(
+      ellipse 120% 92% at calc(var(--floor-hotspot-x) + 7%) 100%,
+      rgba(170, 205, 255, 0.10) 0%,
+      transparent 72%
+    );
 }
 
 .short-version-grid {
@@ -104,6 +202,8 @@
     0 12px 48px rgba(20, 30, 80, 0.25),
     0 4px 14px rgba(0, 0, 0, 0.40);
   min-height: 18rem;
+  /* Soft beam glow (.short-version-card-beam-glow) follows the prism tail along the beam */
+  --beam-glow-anchor: calc(var(--beam-pos, 50%) + 7%);
 }
 
 /* Top-edge bevel highlight — ambient light catching the rounded top edge.
@@ -211,7 +311,7 @@
   --launch-delay: 0.24s;
 }
 
-/* ---- Beam glow (z-1) — wide warm/cool dispersion behind the bright core - */
+/* Beam glow: anchored to prism tail along beam (~beam-pos + 7%; rainbow ends ~beam-pos + 8%). */
 
 .short-version-card-beam-glow {
   position: absolute;
@@ -219,20 +319,20 @@
   z-index: 1;
   pointer-events: none;
   background:
-    /* Warm side (red / amber) just before the core */
+    /* Warm side (red / amber) leading into the prism strip */
     linear-gradient(
       var(--beam-angle, 115deg),
-      transparent calc(var(--beam-pos, 50%) - 14%),
-      rgba(255, 160, 90, calc(var(--beam-intensity, 0.7) * 0.32)) calc(var(--beam-pos, 50%) - 6%),
-      transparent calc(var(--beam-pos, 50%) - 1%)
+      transparent calc(var(--beam-glow-anchor) - 14%),
+      rgba(255, 160, 90, calc(var(--beam-intensity, 0.7) * 0.32)) calc(var(--beam-glow-anchor) - 6%),
+      transparent calc(var(--beam-glow-anchor) - 1%)
     ),
-    /* Cool side (cyan / violet) just after the core */
+    /* Cool side (cyan / violet) centered on the prism tail */
     linear-gradient(
       var(--beam-angle, 115deg),
-      transparent calc(var(--beam-pos, 50%) + 1%),
-      rgba(120, 170, 255, calc(var(--beam-intensity, 0.7) * 0.30)) calc(var(--beam-pos, 50%) + 7%),
-      rgba(160, 110, 255, calc(var(--beam-intensity, 0.7) * 0.18)) calc(var(--beam-pos, 50%) + 12%),
-      transparent calc(var(--beam-pos, 50%) + 18%)
+      transparent calc(var(--beam-glow-anchor) + 1%),
+      rgba(120, 170, 255, calc(var(--beam-intensity, 0.7) * 0.30)) calc(var(--beam-glow-anchor) + 7%),
+      rgba(160, 110, 255, calc(var(--beam-intensity, 0.7) * 0.18)) calc(var(--beam-glow-anchor) + 12%),
+      transparent calc(var(--beam-glow-anchor) + 18%)
     );
   filter: blur(56px);
   mix-blend-mode: screen;
